@@ -1,0 +1,1 @@
+This is a demo project where we are using fastapi with ariadne(graphql library for fastapi). It consumes an api with users list and push the data to graphql server. So when we query at "<host>/graphql" we can see the users data with addresses.
