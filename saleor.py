@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 import requests
 
 app = FastAPI()
@@ -32,13 +32,15 @@ def execute_saleor_query(query: str, variables: dict = None):
 
 # Example endpoint to fetch products from Saleor
 @app.get("/products")
-def get_products():
+def get_products(
+    category_id: str = Query(None, description="Filter products by category ID")
+):
     query = """
-    query {
+    query($categoryId: ID!) {
       products(
         first: 10
         channel: "default-channel"
-        where: { minimalPrice: { range: { gte: 10, lte: 100 } } }
+        filter: {categories: [$categoryId]}
       ) {
         edges {
           node {
@@ -53,7 +55,8 @@ def get_products():
       }
     }
     """
-    data = execute_saleor_query(query)
+    variables = {"categoryId": category_id} if category_id else {}
+    data = execute_saleor_query(query, variables)
     print(data)
     return data["products"]["edges"]
 
