@@ -33,14 +33,18 @@ def execute_saleor_query(query: str, variables: dict = None):
 # Example endpoint to fetch products from Saleor
 @app.get("/products")
 def get_products(
-    category_id: str = Query(None, description="Filter products by category ID")
+    category_id: str = Query(None, description="Filter products by category ID"),
+    search: str = Query(None, description="Search products by name"),
 ):
     query = """
-    query($categoryId: ID!) {
+    query($categoryId: ID!, $search: String) {
       products(
         first: 10
         channel: "default-channel"
-        filter: {categories: [$categoryId]}
+        filter: { 
+          categories: [$categoryId],
+          search: $search 
+        }
       ) {
         edges {
           node {
@@ -55,7 +59,11 @@ def get_products(
       }
     }
     """
-    variables = {"categoryId": category_id} if category_id else {}
+    variables = {}
+    if category_id:
+        variables["categoryId"] = category_id
+    if search:
+        variables["search"] = search
     data = execute_saleor_query(query, variables)
     print(data)
     return data["products"]["edges"]
